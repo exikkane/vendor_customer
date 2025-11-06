@@ -23,7 +23,7 @@ function fn_get_cp_profile_fields_data()
     $company_id = Registry::get('runtime.company_id');
 
     $fields['Company ID'] = [
-        'process_put' => ['fn_exim_set_vendor_customer_info', $company_id, '#key', '#new'],
+        'process_put' => ['fn_exim_set_vendor_customer_info', $company_id, '#key', '#new', '#row'],
     ];
 
    if (!empty($fields)) {
@@ -42,8 +42,11 @@ function fn_get_cp_profile_fields_data()
    return $fields;
 }
 
-function fn_exim_set_vendor_customer_info($company_id, $user_id, $is_new)
+function fn_exim_set_vendor_customer_info($company_id, $user_id, $is_new, $row)
 {
+    if (!isset($row['user_type']) || $row['user_type'] != 'N') {
+        return;
+    }
     if ($is_new) {
         db_query('UPDATE ?:users SET company_id = ?i WHERE user_id = ?i', $company_id, $user_id);
     }
