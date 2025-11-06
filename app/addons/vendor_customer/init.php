@@ -1,0 +1,3 @@
+<?php
+
+fn_register_hooks('get_users', 'get_user_types', 'get_user_info_before', 'is_user_exists_post');

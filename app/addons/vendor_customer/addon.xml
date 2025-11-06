@@ -1,0 +1,39 @@
+<?xml version="1.0"?>
+<addon scheme="3.0">
+    <id>vendor_customer</id>
+    <version>1.0</version>
+    <priority>10000</priority>
+    <position>0</position>
+    <default_language>en</default_language>
+    <status>active</status>
+    <name>Vendor Customers</name>
+    <description>Adds a new entity - Vendor customers. Allow vendors to import their own customers.</description>
+    <supplier>A. Larionov | CS-Cart</supplier>
+    <language_variables>
+        <item id="vendor_customers_import" lang="en">Customers Import</item>
+        <item id="vendor_customers" lang="en">Vendor Customers</item>
+        <item id="privilege_groups.vendor_customer" lang="en">Customers Import</item>
+    </language_variables>
+
+    <settings edition_type="ROOT">
+        <sections>
+            <section id="general">
+                <items>
+                    <item id="vendor_customers_field_type">
+                        <type>input</type>
+                        <default_value>K</default_value>
+                        <name>Vendor Customers Profile Field Type</name>
+                    </item>
+                </items>
+            </section>
+        </sections>
+    </settings>
+
+    <functions>
+        <item for="install">fn_vendor_customer_install</item>
+        <item for="uninstall">fn_vendor_customer_uninstall</item>
+    </functions>
+
+    <item>REPLACE INTO ?:privileges (privilege, is_default, section_id, group_id, is_view) VALUES ('manage_vendor_customers', 'Y', 'addons', 'vendor_customer', 'N');</item>
+    <item for="uninstall">DELETE FROM ?:privileges WHERE privilege = 'manage_vendor_customers'</item>
+</addon>
