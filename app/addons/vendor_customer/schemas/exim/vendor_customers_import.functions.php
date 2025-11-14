@@ -58,3 +58,17 @@ function fn_import_check_user_vendors_company_id($primary_object_id, &$object)
         $object['user_type'] = 'N';
     }
 }
+
+function fn_import_assign_vendor_customer_mapping_for_new_customers($primary_object_ids)
+{
+    if (Registry::get('runtime.company_id')) {
+        if ($primary_object_ids) {
+            foreach ($primary_object_ids as $primary_object) {
+                db_replace_into('vendor_customers_mapping', [
+                    'vendor_customer_id' => $primary_object['user_id'],
+                    'vendor_id' => Registry::get('runtime.company_id')
+                ]);
+            }
+        }
+    }
+}

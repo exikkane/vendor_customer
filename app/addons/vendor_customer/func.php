@@ -68,7 +68,7 @@ function fn_vendor_customer_actualize_profile_tables(): void
 function fn_vendor_customer_get_users($params, $fields, $sortings, &$condition, &$join): void
 {
     $company_id = Registry::get('runtime.company_id');
-    if (!empty($params['user_type']) && $params['user_type'] == 'N' && !empty($company_id)) {
+    if (!empty($company_id)) {
         $join .= db_quote(' LEFT JOIN ?:vendor_customers_mapping ON ?:vendor_customers_mapping.vendor_customer_id = ?:users.user_id');
         $condition['company_id'] = fn_get_company_condition('?:vendor_customers_mapping.vendor_id', true, $company_id);
     }
@@ -171,8 +171,24 @@ function fn_vendor_customer_dispatch_before_display()
 }
 function fn_vendor_customer_set_notification_pre($type, $title, $message, $message_state, $extra, $init_message) {
 
-    if  ($message ==  __('access_denied') && $_REQUEST['dispatch'] == 'profiles.update' && $_REQUEST['user_type'] == 'N') {
+    if  (
+        $message ==  __('access_denied')
+        && ($_REQUEST['dispatch'] == 'profiles.update' || $_REQUEST['dispatch'] == 'profiles.add')
+        && $_REQUEST['user_type'] == 'N') {
         $key = md5($type . $title . $message . $extra);
         Tygh::$app['session']['notifications_to_delete'][] = $key;
     }
+}
+
+function fn_vendor_customer_get_users_pre(&$params)
+{
+    $company_id = Registry::get('runtime.company_id');
+    if (!empty($company_id) && empty($params['user_type'])) {
+        $params['user_type'] = 'N';
+    }
+}
+
+function fn_vendor_customer_get_user_type_description(&$type_descr) {
+    $type_descr['S']['N'] = 'vendor_customers';
+    $type_descr['P']['N'] = 'vendor_customers';
 }

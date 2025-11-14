@@ -60,6 +60,11 @@ $schema['import_process_data']['check_company_id'] = [
     'function'    => 'fn_import_check_user_vendors_company_id',
     'args'        => ['$primary_object_id', '$object'],
 ];
+$schema['post_processing']['assign_vendor_customer_mapping_for_new_customers'] = [
+    'function'    => 'fn_import_assign_vendor_customer_mapping_for_new_customers',
+    'args'        => ['$primary_object_ids'],
+    'import_only' => true,
+];
 
 $schema['pre_export_process'] = [
     'set_allowed_company_ids' => [
