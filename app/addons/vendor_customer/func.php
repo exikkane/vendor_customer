@@ -1,5 +1,6 @@
 <?php
 
+use Tygh\Enum\ProfileDataTypes;
 use Tygh\Registry;
 
 function fn_vendor_customer_install(): void
@@ -61,13 +62,15 @@ function fn_vendor_customer_actualize_profile_tables(): void
  * @param $fields
  * @param $sortings
  * @param $condition
+ * @param $join
  * @return void
  */
-function fn_vendor_customer_get_users($params, $fields, $sortings, &$condition): void
+function fn_vendor_customer_get_users($params, $fields, $sortings, &$condition, &$join): void
 {
     $company_id = Registry::get('runtime.company_id');
     if (!empty($params['user_type']) && $params['user_type'] == 'N' && !empty($company_id)) {
-        $condition['company_id'] = fn_get_company_condition('?:users.company_id', true, $company_id);
+        $join .= db_quote(' LEFT JOIN ?:vendor_customers_mapping ON ?:vendor_customers_mapping.vendor_customer_id = ?:users.user_id');
+        $condition['company_id'] = fn_get_company_condition('?:vendor_customers_mapping.vendor_id', true, $company_id);
     }
 }
 
@@ -90,13 +93,17 @@ function fn_vendor_customer_get_user_types(&$types): void
  * Adds a condition of retrieving a user info with user type = 'N'. Only 'V' user type is retrieved by default.
  *
  * @param $condition
+ * @param $user_id
+ * @param $user_fields
+ * @param $join
  * @return void
  */
-function fn_vendor_customer_get_user_info_before(&$condition): void
+function fn_vendor_customer_get_user_info_before(&$condition, $user_id, $user_fields, &$join): void
 {
     $company_id = Registry::get('runtime.company_id');
-    if ($company_id) {
-        $condition = "{$condition} OR (user_type = 'N' AND ?:users.company_id = {$company_id})";
+    if ($company_id && isset($_REQUEST['user_type']) && $_REQUEST['user_type'] == 'N') {
+        $join .= db_quote(' LEFT JOIN ?:vendor_customers_mapping ON ?:vendor_customers_mapping.vendor_customer_id = ?:users.user_id');
+        $condition = "AND user_type = 'N' AND ?:vendor_customers_mapping.vendor_id = {$company_id}";
     }
 }
 
@@ -118,5 +125,54 @@ function fn_vendor_customer_is_user_exists_post($user_id, $user_data, &$is_exist
         if ($current_user_type == 'N') {
             $is_exist = false;
         }
+    }
+}
+
+function fn_vendor_customer_get_profile_fields($location, $select, &$condition): void
+{
+    if ($location == 'N') {
+        if (strpos($condition, "profile_type = 'U'") !== false) {
+            $condition = str_replace("profile_type = 'U'", "profile_type = 'K'", $condition);
+        }
+    }
+}
+
+function fn_vendor_customers_import_fill_user_data($fields, $profile_data)
+{
+    $current_fields_values = fn_get_profile_fields_data(ProfileDataTypes::USER, $profile_data['user_id']);
+    foreach ($fields as $id => &$field_data) {
+        if ($field_data['profile_type'] === 'K') {
+            if (isset($current_fields_values[$id])) {
+                $field_data['value'] = $current_fields_values[$id];
+            } else {
+                $field_data['value'] = $profile_data[$field_data['field_name']];
+            }
+            $field_data['field_type'] = 'I';
+        }
+    }
+
+    return $fields;
+}
+
+function fn_vendor_customers_import_check_vendor_customer_permissions($customer_id, $company_id): bool
+{
+    return (bool) db_get_field('SELECT COUNT(*) FROM ?:vendor_customers_mapping WHERE vendor_id = ?i AND vendor_customer_id = ?i', $company_id, $customer_id);
+}
+
+function fn_vendor_customer_dispatch_before_display()
+{
+    if (isset(Tygh::$app['session']['notifications_to_delete']) && is_array(Tygh::$app['session']['notifications_to_delete']))
+    {
+        foreach (Tygh::$app['session']['notifications_to_delete'] as $k => $key) {
+            unset(Tygh::$app['session']['notifications'][$key]);
+            unset(Tygh::$app['session']['notifications_to_delete'][$k]);
+        }
+    }
+}
+function fn_vendor_customer_set_notification_pre($type, $title, $message, $message_state, $extra, $init_message) {
+
+    if  ($message ==  __('access_denied') && $_REQUEST['dispatch'] == 'profiles.update' && $_REQUEST['user_type'] == 'N') {
+        $key = md5($type . $title . $message . $extra);
+        Tygh::$app['session']['notifications_to_delete'][] = $key;
     }
 }

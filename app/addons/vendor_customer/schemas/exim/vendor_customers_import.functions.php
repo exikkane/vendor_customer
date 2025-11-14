@@ -20,34 +20,41 @@ function fn_get_cp_profile_fields_data()
         WHERE pf.field_name IN (?a) AND pf.profile_type = ?s', 'description',
         $user_profiles_columns, Registry::get('addons.vendor_customer.vendor_customers_field_type')
     );
-    $company_id = Registry::get('runtime.company_id');
 
-    $fields['Company ID'] = [
-        'process_put' => ['fn_exim_set_vendor_customer_info', $company_id, '#key', '#new', '#row'],
-    ];
+    if (!empty($fields)) {
+        foreach ($fields as $description => &$field) {
+            if ($description === 'Company ID') {
+                continue;
+            }
 
-   if (!empty($fields)) {
-       foreach ($fields as $description => &$field) {
-           if ($description === 'Company ID') {
-               continue;
-           }
+            $field = [
+                'table'    => 'user_profiles',
+                'db_field' => $field['db_field'],
+            ];
+        }
+    }
 
-           $field = [
-               'table'    => 'user_profiles',
-               'db_field' => $field['db_field'],
-           ];
-       }
-   }
-
-   return $fields;
+    return $fields;
 }
 
-function fn_exim_set_vendor_customer_info($company_id, $user_id, $is_new, $row)
+
+function fn_set_allowed_vendors_company_ids(&$conditions)
 {
-    if (!isset($row['user_type']) || $row['user_type'] != 'N') {
-        return;
+    if (Registry::get('runtime.company_id')) {
+        $company_customers_ids = implode(',', db_get_fields("SELECT vendor_customer_id FROM ?:vendor_customers_mapping WHERE vendor_id = ?i", Registry::get('runtime.company_id')));
+        $conditions[] = "users.user_id IN ($company_customers_ids)";
     }
-    if ($is_new) {
-        db_query('UPDATE ?:users SET company_id = ?i WHERE user_id = ?i', $company_id, $user_id);
+}
+
+function fn_import_check_user_vendors_company_id($primary_object_id, &$object)
+{
+    if (Registry::get('runtime.company_id')) {
+        if ($primary_object_id) {
+            db_replace_into('vendor_customers_mapping', [
+                'vendor_customer_id' => $primary_object_id['user_id'],
+                'vendor_id' => Registry::get('runtime.company_id')
+            ]);
+        }
+        $object['user_type'] = 'N';
     }
 }

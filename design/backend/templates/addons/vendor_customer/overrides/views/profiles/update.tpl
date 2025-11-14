@@ -7,10 +7,8 @@
 {$show_storefront_picker = $show_storefront_picker|default:false}
 
 {include file="views/profiles/components/profiles_scripts.tpl"}
-{if $user_data.user_type == 'N'}
-    {$hide_inputs=true}
-{/if}
-<form name="profile_form" enctype="multipart/form-data" action="{""|fn_url}" method="post" class="admin-content-external-form form-horizontal form-edit {if ($runtime.company_id && $id && $user_data.company_id != $runtime.company_id && $id != $auth.user_id) || $hide_inputs} cm-hide-inputs{/if}">
+
+<form name="profile_form" enctype="multipart/form-data" action="{""|fn_url}" method="post" class="admin-content-external-form form-horizontal form-edit ">
 {capture name="mainbox"}
 
 {capture name="tabsbox"}
@@ -31,10 +29,20 @@
     <input type="hidden" name="user_id" value="{$id}" />
     <input type="hidden" class="cm-no-hide-input" name="selected_section" id="selected_section" value="{$selected_section}" />
     <input type="hidden" class="cm-no-hide-input" name="user_type" value="{$smarty.request.user_type}" />
+    <input type="hidden" name="profile_id" value="{$user_data.profile_id}" />
 
     <div id="content_general">
         {hook name="profiles:general_content"}
-            {include file="views/profiles/components/profiles_account.tpl"}
+            {if $user_data.user_type != 'N'}
+                {include file="views/profiles/components/profiles_account.tpl"}
+            {else}
+                <div class="control-group">
+                    <label for="email" class="control-label cm-email">E-mail:</label>
+                    <div class="controls">
+                        <input type="text" id="email" disabled name="" class="input-large" size="32" maxlength="128" value="{$user_data.email}">
+                    </div>
+                </div>
+            {/if}
 
             {if ("ULTIMATE"|fn_allowed_for || $user_type == "V") && $id != $auth.user_id}
 
@@ -224,7 +232,7 @@
 
     {hook name="profiles:tabs_content"}
     {/hook}
-    {if !$user_data|fn_allow_save_object:"users" && $id && $user_data.user_id != $auth.user_id || $hide_inputs}
+    {if !$user_data|fn_allow_save_object:"users" && $id && $user_data.user_id != $auth.user_id && ($user_data.user_type != 'N') || ($hide_inputs && $user_data.user_type != 'N')}
         {assign var="hide_first_button" value=true}
     {/if}
 
@@ -288,10 +296,13 @@
         {else}
             {include file="buttons/button.tpl" but_text=__("create") but_meta="dropdown-toggle" but_role="submit-link" but_name="dispatch[profiles.`$runtime.mode`]" but_target_form="profile_form" save=$id}
         {/if}
+    {if $user_data.user_type != 'N'}
         <ul class="dropdown-menu">
             <li><a><input type="checkbox" name="notify_customer" value="Y" checked="checked"  id="notify_customer" />
-                {__("notify_user")}</a></li>
+                    {__("notify_user")}</a></li>
         </ul>
+    {/if}
+
     {/hook}
 </div>
 

@@ -22,7 +22,7 @@
                     <item id="vendor_customers_field_type">
                         <type>input</type>
                         <default_value>K</default_value>
-                        <name>Vendor Customers Profile Field Type</name>
+                        c
                     </item>
                 </items>
             </section>
@@ -33,7 +33,17 @@
         <item for="install">fn_vendor_customer_install</item>
         <item for="uninstall">fn_vendor_customer_uninstall</item>
     </functions>
-
+    <queries>
+        <item>
+            CREATE TABLE IF NOT EXISTS `?:vendor_customers_mapping` (
+            `vendor_customer_id` INT UNSIGNED NOT NULL,
+            `vendor_id` INT UNSIGNED NOT NULL,
+            PRIMARY KEY (`vendor_customer_id`, `vendor_id`),
+            UNIQUE KEY `ext_product_idx` (`vendor_customer_id`, `vendor_id`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+        </item>
+    </queries>
+    
     <item>REPLACE INTO ?:privileges (privilege, is_default, section_id, group_id, is_view) VALUES ('manage_vendor_customers', 'Y', 'addons', 'vendor_customer', 'N');</item>
     <item for="uninstall">DELETE FROM ?:privileges WHERE privilege = 'manage_vendor_customers'</item>
 </addon>
