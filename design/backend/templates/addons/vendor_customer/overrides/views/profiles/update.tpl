@@ -33,15 +33,8 @@
 
     <div id="content_general">
         {hook name="profiles:general_content"}
-            {if $user_data.user_type != 'N'}
+            {if $user_data.user_type != 'N' && $smarty.request.user_type != 'N'}
                 {include file="views/profiles/components/profiles_account.tpl"}
-            {else}
-                <div class="control-group">
-                    <label for="email" class="control-label cm-email">E-mail:</label>
-                    <div class="controls">
-                        <input type="text" id="email" disabled name="" class="input-large" size="32" maxlength="128" value="{$user_data.email}">
-                    </div>
-                </div>
             {/if}
 
             {if ("ULTIMATE"|fn_allowed_for || $user_type == "V") && $id != $auth.user_id}
@@ -296,10 +289,10 @@
         {else}
             {include file="buttons/button.tpl" but_text=__("create") but_meta="dropdown-toggle" but_role="submit-link" but_name="dispatch[profiles.`$runtime.mode`]" but_target_form="profile_form" save=$id}
         {/if}
-    {if $user_data.user_type != 'N'}
+    {if $user_data.user_type != 'N' && $id}
         <ul class="dropdown-menu">
             <li><a><input type="checkbox" name="notify_customer" value="Y" checked="checked"  id="notify_customer" />
-                    {__("notify_user")}</a></li>
+            {__("notify_user")}</a></li>
         </ul>
     {/if}
 

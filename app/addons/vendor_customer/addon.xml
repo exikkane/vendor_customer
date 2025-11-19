@@ -42,8 +42,8 @@
             UNIQUE KEY `ext_product_idx` (`vendor_customer_id`, `vendor_id`)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
         </item>
+
+        <item>REPLACE INTO ?:privileges (privilege, is_default, section_id, group_id, is_view) VALUES ('manage_vendor_customers', 'Y', 'addons', 'vendor_customer', 'N');</item>
+        <item for="uninstall">DELETE FROM ?:privileges WHERE privilege = 'manage_vendor_customers'</item>
     </queries>
-    
-    <item>REPLACE INTO ?:privileges (privilege, is_default, section_id, group_id, is_view) VALUES ('manage_vendor_customers', 'Y', 'addons', 'vendor_customer', 'N');</item>
-    <item for="uninstall">DELETE FROM ?:privileges WHERE privilege = 'manage_vendor_customers'</item>
 </addon>

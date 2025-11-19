@@ -101,9 +101,12 @@ function fn_vendor_customer_get_user_types(&$types): void
 function fn_vendor_customer_get_user_info_before(&$condition, $user_id, $user_fields, &$join): void
 {
     $company_id = Registry::get('runtime.company_id');
-    if ($company_id && isset($_REQUEST['user_type']) && $_REQUEST['user_type'] == 'N') {
-        $join .= db_quote(' LEFT JOIN ?:vendor_customers_mapping ON ?:vendor_customers_mapping.vendor_customer_id = ?:users.user_id');
-        $condition = "AND user_type = 'N' AND ?:vendor_customers_mapping.vendor_id = {$company_id}";
+    if ($company_id) {
+        $requested_user_type = db_get_field('SELECT user_type FROM ?:users WHERE user_id = ?i', $user_id);
+        if ((isset($_REQUEST['user_type']) && $_REQUEST['user_type'] == 'N') || $requested_user_type == 'N') {
+            $join .= db_quote(' LEFT JOIN ?:vendor_customers_mapping ON ?:vendor_customers_mapping.vendor_customer_id = ?:users.user_id');
+            $condition = "AND user_type = 'N' AND ?:vendor_customers_mapping.vendor_id = {$company_id}";
+        }
     }
 }
 
@@ -191,4 +194,9 @@ function fn_vendor_customer_get_users_pre(&$params)
 function fn_vendor_customer_get_user_type_description(&$type_descr) {
     $type_descr['S']['N'] = 'vendor_customers';
     $type_descr['P']['N'] = 'vendor_customers';
+}
+
+function fn_vendor_customer_fill_auth(&$auth,$user_data)
+{
+
 }
