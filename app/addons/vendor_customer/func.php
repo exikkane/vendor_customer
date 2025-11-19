@@ -195,8 +195,3 @@ function fn_vendor_customer_get_user_type_description(&$type_descr) {
     $type_descr['S']['N'] = 'vendor_customers';
     $type_descr['P']['N'] = 'vendor_customers';
 }
-
-function fn_vendor_customer_fill_auth(&$auth,$user_data)
-{
-
-}
