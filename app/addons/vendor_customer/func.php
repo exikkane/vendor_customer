@@ -68,7 +68,7 @@ function fn_vendor_customer_actualize_profile_tables(): void
 function fn_vendor_customer_get_users($params, $fields, $sortings, &$condition, &$join): void
 {
     $company_id = Registry::get('runtime.company_id');
-    if (!empty($company_id)) {
+    if (!empty($company_id) && $params['user_type'] === 'N') {
         $join .= db_quote(' LEFT JOIN ?:vendor_customers_mapping ON ?:vendor_customers_mapping.vendor_customer_id = ?:users.user_id');
         $condition['company_id'] = fn_get_company_condition('?:vendor_customers_mapping.vendor_id', true, $company_id);
     }
@@ -135,10 +135,12 @@ function fn_vendor_customer_get_profile_fields($location, $select, &$condition):
 {
     if ($location == 'N') {
         if (strpos($condition, "profile_type = 'U'") !== false) {
-            $condition = str_replace("profile_type = 'U'", "profile_type = 'K'", $condition);
+            $profile_type = Registry::get('addons.vendor_customer.vendor_customers_field_type');
+            $condition = str_replace("profile_type = 'U'", "profile_type = '$profile_type'", $condition);
         }
     }
 }
+
 
 function fn_vendor_customers_import_fill_user_data($fields, $profile_data)
 {

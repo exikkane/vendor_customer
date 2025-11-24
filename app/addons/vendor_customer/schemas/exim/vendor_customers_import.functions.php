@@ -17,8 +17,8 @@ function fn_get_cp_profile_fields_data()
         SELECT pfd.description, pf.field_id, pf.field_name as db_field
         FROM ?:profile_fields pf 
         LEFT JOIN ?:profile_field_descriptions pfd ON pfd.object_id = pf.field_id 
-        WHERE pf.field_name IN (?a) AND pf.profile_type = ?s', 'description',
-        $user_profiles_columns, Registry::get('addons.vendor_customer.vendor_customers_field_type')
+        WHERE pf.field_name IN (?a) AND pf.profile_type = ?s AND pfd.lang_code = ?s', 'description',
+        $user_profiles_columns, Registry::get('addons.vendor_customer.vendor_customers_field_type'), CART_LANGUAGE
     );
 
     if (!empty($fields)) {

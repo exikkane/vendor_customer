@@ -3,7 +3,9 @@
 use Tygh\Enum\ProfileDataTypes;
 use Tygh\Registry;
 
-if ($_REQUEST['user_type'] === 'N'
+if (
+    isset($_REQUEST['user_type'])
+    && $_REQUEST['user_type'] === 'N'
     && !fn_check_permissions('vendor_customer', 'manage_vendor_customers', 'admin')
 ) {
     return [CONTROLLER_STATUS_DENIED];
