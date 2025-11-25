@@ -22,7 +22,7 @@
                     <item id="vendor_customers_field_type">
                         <type>input</type>
                         <default_value>K</default_value>
-                        c
+                        <name>Profile type code</name>
                     </item>
                 </items>
             </section>
