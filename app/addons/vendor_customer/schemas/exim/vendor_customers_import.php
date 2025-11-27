@@ -51,6 +51,78 @@ $schema = array(
         'Company' => [
             'db_field' => 'company',
         ],
+        'Billing: first name' => [
+            'db_field' => 'b_firstname',
+            'table'    => 'user_profiles',
+        ],
+        'Billing: last name' => [
+            'db_field' => 'b_lastname',
+            'table'    => 'user_profiles',
+        ],
+        'Billing: address' => [
+            'db_field' => 'b_address',
+            'table'    => 'user_profiles',
+        ],
+        'Billing: address (line 2)' => [
+            'db_field' => 'b_address_2',
+            'table'    => 'user_profiles',
+        ],
+        'Billing: city' => [
+            'db_field' => 'b_city',
+            'table'    => 'user_profiles',
+        ],
+        'Billing: state' => [
+            'db_field' => 'b_state',
+            'table'    => 'user_profiles',
+        ],
+        'Billing: country' => [
+            'db_field' => 'b_country',
+            'table'    => 'user_profiles',
+        ],
+        'Billing: zipcode' => [
+            'db_field' => 'b_zipcode',
+            'table'    => 'user_profiles',
+        ],
+        'Billing: phone' => [
+            'db_field' => 'b_phone',
+            'table'    => 'user_profiles',
+        ],
+        'Shipping: first name' => [
+            'db_field' => 's_firstname',
+            'table'    => 'user_profiles',
+        ],
+        'Shipping: last name' => [
+            'db_field' => 's_lastname',
+            'table'    => 'user_profiles',
+        ],
+        'Shipping: address' => [
+            'db_field' => 's_address',
+            'table'    => 'user_profiles',
+        ],
+        'Shipping: address (line 2)' => [
+            'db_field' => 's_address_2',
+            'table'    => 'user_profiles',
+        ],
+        'Shipping: city' => [
+            'db_field' => 's_city',
+            'table'    => 'user_profiles',
+        ],
+        'Shipping: state' => [
+            'db_field' => 's_state',
+            'table'    => 'user_profiles',
+        ],
+        'Shipping: country' => [
+            'db_field' => 's_country',
+            'table'    => 'user_profiles',
+        ],
+        'Shipping: zipcode' => [
+            'db_field' => 's_zipcode',
+            'table'    => 'user_profiles',
+        ],
+        'Shipping: phone' => [
+            'db_field' => 's_phone',
+            'table'    => 'user_profiles',
+        ],
     ],
 );
 

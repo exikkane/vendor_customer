@@ -145,8 +145,9 @@ function fn_vendor_customer_get_profile_fields($location, $select, &$condition):
 function fn_vendor_customers_import_fill_user_data($fields, $profile_data)
 {
     $current_fields_values = fn_get_profile_fields_data(ProfileDataTypes::USER, $profile_data['user_id']);
+    $profile_type = Registry::get('addons.vendor_customer.vendor_customers_field_type');
     foreach ($fields as $id => &$field_data) {
-        if ($field_data['profile_type'] === 'K') {
+        if ($field_data['profile_type'] === $profile_type) {
             if (isset($current_fields_values[$id])) {
                 $field_data['value'] = $current_fields_values[$id];
             } else {
