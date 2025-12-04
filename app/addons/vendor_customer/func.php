@@ -123,7 +123,7 @@ function fn_vendor_customer_get_user_info_before(&$condition, $user_id, $user_fi
 function fn_vendor_customer_is_user_exists_post($user_id, $user_data, &$is_exist): void
 {
     if ($is_exist) {
-        $current_user_type = db_get_field('SELECT user_type FROM ?:users WHERE email = ?s', $user_data['email']);
+        $current_user_type = db_get_field('SELECT user_type FROM ?:users WHERE user_id = ?i', $is_exist);
 
         if ($current_user_type == 'N') {
             $is_exist = false;
@@ -198,3 +198,13 @@ function fn_vendor_customer_get_user_type_description(&$type_descr) {
     $type_descr['S']['N'] = 'vendor_customers';
     $type_descr['P']['N'] = 'vendor_customers';
 }
+
+function fn_vendor_customer_auth_routines($request, $auth, $field, &$condition, $user_login)
+{
+    if (AREA != 'C') {
+        return;
+    }
+
+    $condition .= db_quote(' AND user_type != ?s', 'N');
+}
+

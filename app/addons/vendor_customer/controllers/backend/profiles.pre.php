@@ -90,27 +90,53 @@ if ($mode === 'update') {
 // ADD MODE
 //
 if ($mode === 'add') {
+    if (!isset($user_data['user_type'])) {
+        $user_data['user_type'] = 'N';
 
-    $user_data['user_type'] = 'N';
+        $user_id = db_query("INSERT INTO ?:users ?e", $user_data);
 
-    $user_id = db_query("INSERT INTO ?:users ?e", $user_data);
+        db_replace_into('vendor_customers_mapping', [
+            'vendor_customer_id' => $user_id,
+            'vendor_id'          => Registry::get('runtime.company_id')
+        ]);
 
-    db_replace_into('vendor_customers_mapping', [
-        'vendor_customer_id' => $user_id,
-        'vendor_id'          => Registry::get('runtime.company_id')
-    ]);
+        fn_handle_address($user_data, $user_type, $data['ship_to_another']);
 
-    fn_handle_address($user_data, $user_type, $data['ship_to_another']);
+        $user_data['profile_id'] = fn_update_user_profile(
+            $user_id,
+            $user_data,
+            'add',
+            $data['ship_to_another']
+        );
 
-    $user_data['profile_id'] = fn_update_user_profile(
-        $user_id,
-        $user_data,
-        'add',
-        $data['ship_to_another']
-    );
+        return [
+            CONTROLLER_STATUS_REDIRECT,
+            'profiles.update?user_id=' . $user_id . '&user_type=N'
+        ];
+    }
+}
 
-    return [
-        CONTROLLER_STATUS_REDIRECT,
-        'profiles.update?user_id=' . $user_id . '&user_type=N'
-    ];
+if ($mode == 'm_delete') {
+    $user_ids = $_REQUEST['user_ids'] ?? [];
+
+    if (empty($user_ids)) {
+        return;
+    }
+
+    foreach ($user_ids as $user_id) {
+        $result = db_query("DELETE FROM ?:users WHERE user_id = ?i", $user_id);
+
+        fn_delete_profile_fields_data(ProfileDataTypes::USER, $user_id);
+
+        db_query('DELETE FROM ?:user_session_products WHERE user_id = ?i', $user_id);
+        db_query('DELETE FROM ?:user_data WHERE user_id = ?i', $user_id);
+        db_query('UPDATE ?:orders SET user_id = 0 WHERE user_id = ?i', $user_id);
+
+        $profile_ids = db_get_fields('SELECT profile_id FROM ?:user_profiles WHERE user_id = ?i', $user_id);
+        foreach ($profile_ids as $profile_id) {
+            fn_delete_user_profile($user_id, $profile_id, true);
+        }
+
+        db_query('DELETE FROM ?:usergroup_links WHERE user_id = ?i', $user_id);
+    }
 }
