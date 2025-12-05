@@ -11,7 +11,7 @@ if (
     return [CONTROLLER_STATUS_DENIED];
 }
 
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !Registry::get('runtime.company_id')) {
     return;
 }
 
@@ -118,17 +118,24 @@ if ($mode === 'add') {
 
 if ($mode == 'm_delete') {
     $user_ids = $_REQUEST['user_ids'] ?? [];
+    $company_id =  Registry::get('runtime.company_id');
 
     if (empty($user_ids)) {
         return;
     }
 
     foreach ($user_ids as $user_id) {
+        db_query('DELETE FROM ?:vendor_customers_mapping WHERE vendor_customer_id = ?i AND vendor_id = ?i', $user_id, $company_id);
+        $current_vendors_mapping_count = db_get_field('SELECT COUNT(*) vendor_customer_id FROM ?:vendor_customers_mapping WHERE vendor_customer_id = ?i', $user_id);
+
+        if ($current_vendors_mapping_count != 0) {
+            continue;
+        }
+
         $result = db_query("DELETE FROM ?:users WHERE user_id = ?i", $user_id);
 
         fn_delete_profile_fields_data(ProfileDataTypes::USER, $user_id);
 
-        db_query('DELETE FROM ?:user_session_products WHERE user_id = ?i', $user_id);
         db_query('DELETE FROM ?:user_data WHERE user_id = ?i', $user_id);
         db_query('UPDATE ?:orders SET user_id = 0 WHERE user_id = ?i', $user_id);
 
@@ -136,7 +143,5 @@ if ($mode == 'm_delete') {
         foreach ($profile_ids as $profile_id) {
             fn_delete_user_profile($user_id, $profile_id, true);
         }
-
-        db_query('DELETE FROM ?:usergroup_links WHERE user_id = ?i', $user_id);
     }
 }
