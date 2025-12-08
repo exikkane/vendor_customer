@@ -125,6 +125,13 @@ if ($mode == 'm_delete') {
     }
 
     foreach ($user_ids as $user_id) {
+        $has_orders = db_get_field("SELECT COUNT(*) FROM ?:orders WHERE user_id = ?i", $user_id);
+
+        if ($has_orders > 0) {
+            fn_set_notification('E', __('error'), 'Not allowed. Remove the user from the existing orders.');
+            continue;
+        }
+
         db_query('DELETE FROM ?:vendor_customers_mapping WHERE vendor_customer_id = ?i AND vendor_id = ?i', $user_id, $company_id);
         $current_vendors_mapping_count = db_get_field('SELECT COUNT(*) vendor_customer_id FROM ?:vendor_customers_mapping WHERE vendor_customer_id = ?i', $user_id);
 
