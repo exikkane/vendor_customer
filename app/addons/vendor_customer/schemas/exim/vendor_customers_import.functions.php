@@ -40,22 +40,31 @@ function fn_get_cp_profile_fields_data()
 
 function fn_set_allowed_vendors_company_ids(&$conditions)
 {
-    if (Registry::get('runtime.company_id')) {
-        $company_customers_ids = implode(',', db_get_fields("SELECT vendor_customer_id FROM ?:vendor_customers_mapping WHERE vendor_id = ?i", Registry::get('runtime.company_id')));
+    $company_id = Registry::get('runtime.company_id');
+    if ($company_id) {
+        $company_customers_ids = implode(',', db_get_fields("SELECT vendor_customer_id FROM ?:vendor_customers_mapping WHERE vendor_id = ?i", $company_id));
         $conditions[] = "users.user_id IN ($company_customers_ids)";
     }
 }
 
-function fn_import_check_user_vendors_company_id($primary_object_id, &$object)
+function fn_import_check_user_vendors_company_id(&$primary_object_id, &$object)
 {
-    if (Registry::get('runtime.company_id')) {
+    $company_id = Registry::get('runtime.company_id');
+    if ($company_id) {
         if ($primary_object_id) {
+            $update_id = $primary_object_id['user_id'];
+            $user_type = db_get_field('SELECT user_type FROM ?:users WHERE user_id = ?i', $update_id);
+
+            if ($user_type != 'N') {
+                $update_id = db_get_field('SELECT user_id FROM ?:users WHERE email = ?s AND user_type = ?s', $object['email'], 'N');
+            }
+
             db_replace_into('vendor_customers_mapping', [
-                'vendor_customer_id' => $primary_object_id['user_id'],
-                'vendor_id' => Registry::get('runtime.company_id')
+                'vendor_customer_id' => $update_id,
+                'vendor_id' => $company_id
             ]);
+            $primary_object_id['user_id'] = $update_id;
         }
-        $object['user_type'] = 'N';
     }
 }
 
