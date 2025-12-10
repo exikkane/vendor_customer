@@ -125,7 +125,7 @@ if ($mode == 'm_delete') {
     }
 
     foreach ($user_ids as $user_id) {
-        $has_orders = db_get_field("SELECT COUNT(*) FROM ?:orders WHERE user_id = ?i", $user_id);
+        $has_orders = db_get_field("SELECT COUNT(*) FROM ?:orders WHERE user_id = ?i AND company_id = ?i", $user_id, Registry::get('runtime.company_id'));
 
         if ($has_orders > 0) {
             fn_set_notification('E', __('error'), 'Not allowed. Remove the user from the existing orders.');
